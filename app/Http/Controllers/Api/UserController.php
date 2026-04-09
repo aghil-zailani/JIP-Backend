@@ -31,6 +31,18 @@ class UserController extends Controller
             ], 401);
         }
 
+        $user = auth()->guard('api')->user();
+
+        if ($user->role !== 'inspektor') {
+            
+            auth()->guard('api')->logout(); 
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Akses ditolak. Hanya Admin yang diperbolehkan masuk melalui API ini.'
+            ], 403);
+        }
+
         return $this->respondWithToken($token);
     }
 

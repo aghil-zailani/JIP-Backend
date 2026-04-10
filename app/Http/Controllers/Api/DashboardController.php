@@ -35,7 +35,7 @@ class DashboardController extends Controller
                 'nama_pelanggan' => $order->nama_pelanggan ?? 'Pelanggan', 
                 'no_hp_pelanggan' => $order->no_hp_pelanggan ?? '08xxxxxxxx',                                
                 'info_layanan' => ($order->mobil ? $order->mobil->nama_mobil . ' (' . $order->mobil->tahun_mobil . ')' : 'Mobil Tidak Diketahui') . ' - ' . ($order->paket_layanan ?? 'Inspeksi Standar'),                                                
-                'komisi_rp' => 50000, 
+                'komisi_rp' => $order->biaya_inspeksi ? 'Rp ' . number_format($order->biaya_inspeksi, 0, ',', '.') : 'Rp 0',
                 'metode_bayar' => 'Tunai',                                
                 'status' => $order->status_inspeksi == 'selesai' ? 'Cair' : 'Proses', 
             ];

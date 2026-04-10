@@ -55,7 +55,7 @@ class UserController extends Controller
             'authorization' => [
                 'access_token' => $token,
                 'type' => 'bearer',
-                'expires_in' => auth()->guard('api')->factory()->getTTL() * 60 
+                'expires_in' => auth()->guard('api')->factory()->getTTL() * 60 //GANTI INI JADI 24 JAM (60 GANTI JADI 1440)
             ]
         ]);
     }
@@ -95,5 +95,15 @@ class UserController extends Controller
             'message' => 'Daftar semua pengguna',
             'data' => $users
         ]);
+    }
+
+    public function logout()
+    {        
+        auth()->guard('api')->logout();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Berhasil logout'
+        ], 200);
     }
 }

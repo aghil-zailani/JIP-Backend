@@ -14,9 +14,15 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->foreignId('mobil_id')->constrained('mobils')->cascadeOnDelete();
+                        
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
+                        
+            $table->string('nama_pelanggan');
+            $table->string('no_hp_pelanggan');
+
             $table->string('status_inspeksi')->default('pending');
             $table->string('lokasi_inspeksi')->nullable();
+            $table->integer('biaya_inspeksi')->nullable();
             $table->timestamps();
         });
     }

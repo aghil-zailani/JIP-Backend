@@ -27,4 +27,9 @@ class Mobil extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function informasiUmum()
+    {
+        return $this->hasOne(InformasiUmum::class);
+    }
 }

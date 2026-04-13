@@ -29,7 +29,7 @@ class UserController extends Controller
                 'success' => false,
                 'message' => 'Email atau password salah'
             ], 401);
-        }
+        }        
 
         $user = auth()->guard('api')->user();
 

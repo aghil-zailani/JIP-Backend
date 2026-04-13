@@ -14,7 +14,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        $middleware->redirectGuestsTo(function (Request $request) {
+            if ($request->is('api/*')) {
+                return null;
+            }
+        });
     })
     ->withExceptions(function (Exceptions $exceptions) {        
         $exceptions->render(function (AuthenticationException $e, Request $request) {
@@ -24,5 +28,5 @@ return Application::configure(basePath: dirname(__DIR__))
                     'message' => 'Unauthenticated. Token tidak valid atau tidak ada.'
                 ], 401);
             }
-        });
+        });        
     })->create();

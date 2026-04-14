@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\HasilInspeksiDetail;
 use App\Models\Order;
 use App\Models\ItemInspeksi;
@@ -15,12 +16,22 @@ class InteriorController extends Controller
     {
         $order = Order::findOrFail($order_id);
         
+        $hasilLama = HasilInspeksiDetail::where('order_id', $order_id)
+                        ->where('item_inspeksi_id', $item_id)
+                        ->first();
+
         $dataUpdate = [
             'status_kondisi' => strtolower($request->kondisi ?? 'normal'),
             'catatan' => $request->catatan,
+            'is_draft' => $request->input('is_draft', true) 
         ];
                 
         if ($request->hasFile('foto_utama')) {
+            if ($hasilLama && $hasilLama->foto_utama) {
+                $oldPath = str_replace('/storage/', '', $hasilLama->foto_utama);
+                Storage::disk('public')->delete($oldPath);
+            }
+
             $file = $request->file('foto_utama');            
             $filename = time() . '_utama_order' . $order_id . '_item' . $item_id . '.' . $file->getClientOriginalExtension();
             $path = $file->storeAs('inspeksi/item', $filename, 'public'); 
@@ -33,6 +44,16 @@ class InteriorController extends Controller
         );
                 
         if ($request->hasFile('foto_tambahan')) {
+            
+            if ($hasilLama) {
+                $fotoLama = FotoKerusakan::where('hasil_inspeksi_detail_id', $hasilLama->id)->get();
+                foreach ($fotoLama as $foto) {
+                    $oldTambahanPath = str_replace('/storage/', '', $foto->path_foto);
+                    Storage::disk('public')->delete($oldTambahanPath);
+                    $foto->delete();
+                }
+            }
+
             foreach ($request->file('foto_tambahan') as $index => $fileTambahan) {
                 $filenameTambahan = time() . '_rusak' . $index . '_order' . $order_id . '_item' . $item_id . '.' . $fileTambahan->getClientOriginalExtension();
                 $pathTambahan = $fileTambahan->storeAs('inspeksi/kerusakan', $filenameTambahan, 'public');
@@ -46,9 +67,13 @@ class InteriorController extends Controller
         
         $hasil->load('fotoKerusakans');
 
+        $pesan = $request->input('is_draft', true) 
+                    ? 'Draft item berhasil disimpan.' 
+                    : 'Data item berhasil diselesaikan dan difinalisasi.';
+
         return response()->json([
             'success' => true,
-            'message' => 'Data item dan foto kerusakan berhasil disimpan',
+            'message' => $pesan,
             'data' => $hasil
         ], 200);
     }

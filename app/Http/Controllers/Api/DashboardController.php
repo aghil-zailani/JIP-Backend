@@ -21,6 +21,7 @@ class DashboardController extends Controller
   
         $saldoKomisi = Komisi::where('user_id', $user->id)
             ->where('status', 'cair') 
+            ->where('created_at', '>=', now()->subDays(30))
             ->sum('jumlah_pendapatan');
        
         $riwayatOrders = Order::with(['mobil'])

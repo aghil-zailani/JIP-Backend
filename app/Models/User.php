@@ -27,6 +27,10 @@ class User extends Authenticatable implements JWTSubject
 
     protected $guarded = ['id']; // Mengizinkan mass assignment selain id
 
+    protected $fillable = [
+        'name', 'email', 'password', 'role', 'no_hp'
+    ];
+
     protected $hidden = [
         'password',
         'remember_token',
@@ -66,5 +70,10 @@ class User extends Authenticatable implements JWTSubject
     public function komisis()
     {
         return $this->hasMany(Komisi::class);
+    }
+
+    public function instansi()
+    {
+        return $this->hasOne(InformasiInstansi::class);
     }
 }

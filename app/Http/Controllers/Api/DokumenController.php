@@ -15,6 +15,10 @@ class DokumenController extends Controller
     public function simpanDokumen(Request $request, $order_id)
     {
         $order = Order::findOrFail($order_id);
+
+        $stnkTersimpan = null;
+        $bpkbTersimpan = null;
+        $dokumenLainTersimpan = null;
         
         if ($request->has('nomor_rangka')) { 
             $stnkData = $request->only(['pajak_1_tahun', 'pajak_5_tahun', 'pkb', 'nomor_rangka', 'nomor_mesin']);

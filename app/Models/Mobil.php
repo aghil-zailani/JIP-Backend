@@ -8,6 +8,10 @@ class Mobil extends Model
 {
     protected $guarded = ['id'];
 
+    protected $fillable = [
+        'nama_mobil', 'tahun_mobil', 'jenis_inspeksi'
+    ];
+
     public function inspeksiBpkb()
     {
         return $this->hasOne(InspeksiBpkb::class);

@@ -17,19 +17,17 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_pelanggan'  => 'required|string|max:255',
             'email_pelanggan' => 'required|email|max:255',
-            'no_hp_pelanggan' => 'required|string|max:20',
-            
+            'no_hp_pelanggan' => 'required|string|max:20',            
             'merek_mobil'     => 'required|string',
             'model_mobil'     => 'required|string',
-            'tahun_mobil'     => 'required|digits:4',
-            
+            'tahun_mobil'     => 'required|digits:4',        
             'lokasi'          => 'required|string',
             'tanggal_inspeksi'=> 'required|date_format:Y-m-d',
             'waktu_inspeksi'  => 'required|date_format:H:i',
-            'biaya'           => 'required|numeric',
-                        
-            'inspektor_id'    => 'required|exists:users,id' 
+            'biaya'           => 'required|numeric',            
         ]);
+
+        $user = auth()->guard('api')->user();
 
         if ($validator->fails()) {
             return response()->json([
@@ -46,14 +44,14 @@ class OrderController extends Controller
             $mobil = Mobil::create([
                 'nama_mobil'     => $namaMobilLengkap,
                 'tahun_mobil'    => $request->tahun_mobil,
-                'jenis_inspeksi' => $request->jenis_inspeksi ?? 'Standar',
+                'jenis_inspeksi' => $request->jenis_inspeksi ?? 'Inspeksi Standar',
             ]);
             
             $jadwalInspeksi = Carbon::parse($request->tanggal_inspeksi . ' ' . $request->waktu_inspeksi);
             
             $order = Order::create([
                 'mobil_id'        => $mobil->id,
-                'user_id'         => $request->inspektor_id,
+                'user_id'         => $user->id,
                 'nama_pelanggan'  => $request->nama_pelanggan,
                 'email_pelanggan' => $request->email_pelanggan,
                 'no_hp_pelanggan' => $request->no_hp_pelanggan,

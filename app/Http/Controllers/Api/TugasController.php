@@ -8,6 +8,8 @@ use App\Models\Order;
 use App\Models\Mobil;
 use App\Models\InformasiUmum;
 use Illuminate\Support\Facades\Validator;
+use App\Models\Komisi;
+use Illuminate\Support\Facades\DB;
 
 class TugasController extends Controller
 {
@@ -89,7 +91,18 @@ class TugasController extends Controller
         
         $order->update([
             'status_inspeksi' => 'selesai'
-        ]);                                
+        ]); 
+
+        $slip = 'SLIP-' . now()->format('YmdHis') . rand(10, 99);
+        
+        $user = auth()->guard('api')->user();
+        Komisi::create([
+            'user_id' => $user->id,
+            'nomor_slip' => $slip,
+            'jumlah_pendapatan' => $order->biaya_inspeksi,
+            'metode_bayar' => '-',
+            'status' => 'pending',
+        ]);        
 
         return response()->json([
             'success' => true,

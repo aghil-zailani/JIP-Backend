@@ -80,4 +80,14 @@ class DokumenController extends Controller
             ]
         ]);
     }
+
+    public function getDokumen($order_id)
+    {
+        $order = Order::with('dokumen')->findOrFail($order_id);
+
+        return response()->json([
+            'success' => true,
+            'data' => $order->dokumen
+        ]);
+    }
 }

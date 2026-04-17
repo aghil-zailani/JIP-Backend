@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\DokumenController;
 use App\Http\Controllers\Api\InteriorController;
 use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\OrderController;
+use App\Http\Controllers\Api\KomisiController;
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
@@ -36,6 +37,9 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/tugas/{order_id}/selesai', [TugasController::class, 'selesaikanTugas']);
 
     Route::get('/master/kategori-item', [MasterDataController::class, 'getKategoriItems']);
+
+    Route::get('/komisi', [KomisiController::class, 'index']);
+    Route::get('/komisi/{id}', [KomisiController::class, 'show']);
 
     Route::post('/logout', [UserController::class, 'logout']);
 });

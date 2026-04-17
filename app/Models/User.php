@@ -74,6 +74,6 @@ class User extends Authenticatable implements JWTSubject
 
     public function instansi()
     {
-        return $this->hasOne(InformasiInstansi::class);
+        return $this->hasOne(InformasiInstansi::class, 'user_id', 'id');
     }
 }

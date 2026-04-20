@@ -96,4 +96,33 @@ class KomisiController extends Controller
             ] : null
         ]);
     }
+
+    public function updatePembayaran(Request $request, $id)
+    {
+        $user = auth()->guard('api')->user();
+        $komisi = Komisi::find($id);
+
+        if (!$komisi) {
+            return response()->json(['status' => 'error', 'message' => 'Data komisi tidak ditemukan'], 404);
+        }
+
+        $request->validate([
+            'metode_pembayaran' => 'required|string'
+        ]);
+        
+        $komisi->update([
+            'status' => 'cair',
+            'metode_bayar' => $request->metode_pembayaran
+        ]);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Pembayaran komisi berhasil diselesaikan!',
+            'data' => [
+                'komisi_id' => $komisi->id,
+                'status' => 'Selesai',
+                'metode_pembayaran' => $komisi->metode_bayar
+            ]
+        ], 200);
+    }
 }

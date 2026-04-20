@@ -40,6 +40,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/komisi', [KomisiController::class, 'index']);
     Route::get('/komisi/{id}', [KomisiController::class, 'show']);
+    Route::post('/komisi/{id}/selesai', [KomisiController::class, 'updatePembayaran']);
 
     Route::post('/logout', [UserController::class, 'logout']);
 });

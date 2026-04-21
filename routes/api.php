@@ -28,6 +28,7 @@ Route::middleware('auth:api')->group(function () {
 
     Route::get('/tugas/{order_id}/dokumen', [DokumenController::class, 'getDokumen']);
 
+    Route::get('/tugas/detail/{order_id}', [TugasController::class, 'detailTugas']);
     Route::post('/tugas/{order_id}/informasi', [TugasController::class, 'simpanInformasi']);
     Route::post('/tugas/{order_id}/dokumen', [DokumenController::class, 'simpanDokumen']);
     Route::post('/tugas/{order_id}/interior/{item_id}', [InteriorController::class, 'simpanHasilItem']);
@@ -35,6 +36,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/tugas/{order_id}/mesin/{item_id}', [InteriorController::class, 'simpanHasilItem']);
     Route::post('/tugas/{order_id}/eksterior/{item_id}', [InteriorController::class, 'simpanHasilItem']);
     Route::post('/tugas/{order_id}/selesai', [TugasController::class, 'selesaikanTugas']);
+
+    Route::get('/laporan/{komisi_id}/pdf', [TugasController::class, 'exportPdf']);
 
     Route::get('/master/kategori-item', [MasterDataController::class, 'getKategoriItems']);
 

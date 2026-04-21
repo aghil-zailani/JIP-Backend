@@ -17,7 +17,8 @@ class OrderController extends Controller
         $validator = Validator::make($request->all(), [
             'nama_pelanggan'  => 'required|string|max:255',
             'email_pelanggan' => 'required|email|max:255',
-            'no_hp_pelanggan' => 'required|string|max:20',            
+            'no_hp_pelanggan' => 'required|string|max:20',   
+            'alamat_pelanggan' => 'required|string|max:255',         
             'merek_mobil'     => 'required|string',
             'model_mobil'     => 'required|string',
             'tahun_mobil'     => 'required|digits:4',        
@@ -55,6 +56,7 @@ class OrderController extends Controller
                 'nama_pelanggan'  => $request->nama_pelanggan,
                 'email_pelanggan' => $request->email_pelanggan,
                 'no_hp_pelanggan' => $request->no_hp_pelanggan,
+                'alamat_pelanggan' => $request->alamat_pelanggan,
                 'lokasi_inspeksi' => $request->lokasi,
                 'jadwal_inspeksi' => $jadwalInspeksi,
                 'biaya_inspeksi'  => $request->biaya,

@@ -107,8 +107,16 @@ class KomisiController extends Controller
         }
 
         $request->validate([
-            'metode_pembayaran' => 'required|string'
+            'metode_pembayaran' => 'required|string',
+            'bukti_pembayaran' => 'nullable|image|mimes:jpeg,png,jpg|max:2048'
         ]);
+
+        if ($request->hasFile('bukti_pembayaran')) {
+            $file = $request->file('bukti_pembayaran');
+            $filename = time() . '_bukti_' . $komisi->id . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('bukti_pembayaran', $filename, 'public');
+            $komisi->bukti_pembayaran = '/storage/' . $path;
+        }
         
         $komisi->update([
             'status' => 'cair',
@@ -121,7 +129,8 @@ class KomisiController extends Controller
             'data' => [
                 'komisi_id' => $komisi->id,
                 'status' => 'Selesai',
-                'metode_pembayaran' => $komisi->metode_bayar
+                'metode_pembayaran' => $komisi->metode_bayar,
+                'bukti_pembayaran' => $komisi->bukti_pembayaran
             ]
         ], 200);
     }

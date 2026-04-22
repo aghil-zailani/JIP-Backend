@@ -113,6 +113,88 @@ class TugasController extends Controller
         ], 200);
     }
 
+    // public function selesaikanTugas($order_id)
+    // {        
+    //     $order = Order::with([
+    //         'mobil.informasiUmum',
+    //         'mobil.inspeksiStnk',
+    //         'mobil.inspeksiBpkb',
+    //         'mobil.inspeksiDokumenLain',
+    //         'hasilInspeksiDetails'
+    //     ])->findOrFail($order_id);
+                
+    //     if ($order->status_inspeksi === 'selesai') {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Tugas ini sudah diselesaikan sebelumnya.'
+    //         ], 400);
+    //     }
+                        
+    //     $errors = [];
+    //     $mobil = $order->mobil;
+        
+    //     if (!$mobil->informasiUmum) {
+    //         $errors[] = 'Informasi Umum Kendaraan belum diisi.';
+    //     }
+    //     if (!$mobil->inspeksiStnk) {
+    //         $errors[] = 'Dokumen STNK belum diperiksa / difoto.';
+    //     }
+    //     if (!$mobil->inspeksiBpkb) {
+    //         $errors[] = 'Dokumen BPKB belum diperiksa / difoto.';
+    //     }
+                
+    //     $requiredItemIds = \App\Models\ItemInspeksi::pluck('id')->toArray();
+        
+    //     $filledItemIds = $order->hasilInspeksiDetails->pluck('item_inspeksi_id')->toArray();
+        
+    //     $missingItemIds = array_diff($requiredItemIds, $filledItemIds);
+
+    //     if (!empty($missingItemIds)) {
+    //         $missingCount = count($missingItemIds);
+    //         $errors[] = "Masih ada {$missingCount} titik inspeksi yang belum diperiksa.";
+    //     }
+        
+    //     $itemTanpaKondisi = $order->hasilInspeksiDetails->whereNull('status_kondisi')->count();
+    //     if ($itemTanpaKondisi > 0) {
+    //         $errors[] = "Terdapat {$itemTanpaKondisi} titik inspeksi yang belum dipilih kondisinya (Normal/Rusak).";
+    //     }
+
+    //     $itemTanpaFoto = $order->hasilInspeksiDetails->whereNull('foto_utama')->count();
+    //     if ($itemTanpaFoto > 0) {
+    //         $errors[] = "Terdapat {$itemTanpaFoto} titik inspeksi yang belum dilengkapi dengan foto.";
+    //     }
+
+    //     if (count($errors) > 0) {
+    //         return response()->json([
+    //             'success' => false,
+    //             'message' => 'Gagal menyelesaikan tugas. Masih ada data yang belum lengkap!',
+    //             'errors' => $errors
+    //         ], 400);
+    //     }
+        
+    //     $order->update([
+    //         'status_inspeksi' => 'selesai'
+    //     ]); 
+
+    //     $slip = 'SLIP-' . now()->format('YmdHis') . rand(10, 99);
+        
+    //     $user = auth()->guard('api')->user();
+    //     Komisi::create([
+    //         'user_id' => $user->id,
+    //         'order_id' => $order->id,
+    //         'nomor_slip' => $slip,
+    //         'jumlah_pendapatan' => $order->biaya_inspeksi,
+    //         'metode_bayar' => '-',
+    //         'status' => 'pending',
+    //     ]);        
+
+    //     return response()->json([
+    //         'success' => true,
+    //         'message' => 'Laporan Inspeksi berhasil dikirim dan tugas diselesaikan!',
+    //         'data' => $order
+    //     ], 200);
+    // }
+
     public function detailTugas($komisi_id)
     {
         $user = auth()->guard('api')->user();
@@ -188,24 +270,58 @@ class TugasController extends Controller
             'success' => true,
             'data' => $dataLaporan
         ], 200);
-    }
+    }    
 
-    public function exportPDF($order_id)
-    {
-        $komisi = Komisi::with(['order.mobil.stnk', 'order.mobil.bpkb', 'order.mobil.mesin'])->find($komisi_id);
+    public function exportPDF($komisi_id)
+    {        
+        $user = auth()->guard('api')->user()->load('instansi');         
+        $komisi = Komisi::with([
+            'order.mobil.inspeksiStnk', 
+            'order.mobil.inspeksiBpkb',
+            'order.mobil.informasiUmum', 
+            'order.hasilInspeksiDetails.itemInspeksi.kategoriInspeksi'
+        ])->findOrFail($komisi_id);
         
         $order = $komisi->order;
-        $mobil = $order->mobil;
+        $mobil = $order->mobil;        
+        $hasil_inspeksi = [];
+        $titik_normal = 0;
+        $titik_tidak_normal = 0;
+
+        $fotoDepan = $order->hasilInspeksiDetails->first(function ($item) {
+            return $item->itemInspeksi->nama_item == 'Foto Depan Kendaraan';
+        });
+
+        foreach ($order->hasilInspeksiDetails as $detail) {
+            $kategori = $detail->itemInspeksi->kategoriInspeksi->nama_kategori;
+            
+            if ($detail->status_kondisi === 'normal') {
+                $titik_normal++;
+            } else {
+                $titik_tidak_normal++;
+            }
+
+            $hasil_inspeksi[$kategori][] = $detail;
+        }
 
         $dataLaporan = [
+            'instansi' => $user->instansi,
+            'inspektor' => $user->name,
+            'tanggal' => $order->updated_at->translatedFormat('d M Y'),
             'mobil' => $mobil,
-            'stnk' => $mobil->stnk,
-            'mesin' => $mobil->mesin 
+            'stnk' => $mobil->inspeksiStnk,
+            'bpkb' => $mobil->inspeksiBpkb,
+            'informasi_umum' => $mobil->informasiUmum,
+            'foto_depan' => $fotoDepan,
+            'hasil_inspeksi' => $hasil_inspeksi,
+            'total_titik' => $titik_normal + $titik_tidak_normal,
+            'titik_normal' => $titik_normal,
+            'titik_tidak_normal' => $titik_tidak_normal,
         ];
 
         $pdf = Pdf::loadView('laporan.pdf_template', $dataLaporan);
-
-        $pdf->setPaper('A4', 'portrait');
+        
+        $pdf->setPaper('A4', 'portrait')->setWarnings(false);
 
         return $pdf->stream('Laporan_Inspeksi_' . $mobil->nopol . '.pdf');
     }

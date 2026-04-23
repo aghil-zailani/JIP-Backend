@@ -312,7 +312,7 @@ class TugasController extends Controller
             'stnk' => $mobil->inspeksiStnk,
             'bpkb' => $mobil->inspeksiBpkb,
             'informasi_umum' => $mobil->informasiUmum,
-            'foto_depan' => $fotoDepan,
+            'foto_depan' => $fotoDepan ? $fotoDepan->foto_utama : null,
             'hasil_inspeksi' => $hasil_inspeksi,
             'total_titik' => $titik_normal + $titik_tidak_normal,
             'titik_normal' => $titik_normal,

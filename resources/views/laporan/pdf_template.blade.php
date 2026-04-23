@@ -58,15 +58,18 @@
                     <h2 style="margin:0; color:#0d1b54;">{{ $instansi->nama_instansi ?? 'Sistem Inspeksi' }}</h2>
                 @endif
             </td>
-            <td class="laporan-title">Laporan Penilaian Harga</td>
+            <td class="laporan-title">Laporan Hasil Inspeksi</td>
         </tr>
     </table>
 
     <table class="car-info-table">
         <tr>
             <td class="car-photo-container">
-                @if($foto_utama_mobil)
-                    <img src="{{ storage_path('app/public/' . $foto_utama_mobil) }}" class="car-photo">
+                @if($foto_depan)
+                    @php                        
+                        $clean_path_depan = str_replace('/storage/', '', $foto_depan);
+                    @endphp
+                    <img src="{{ storage_path('app/public/' . $clean_path_depan) }}" class="car-photo">
                 @else
                     <div style="width:150px; height:120px; background:#f0f0f0; text-align:center; padding-top:40px; color:#ccc;">
                         Foto Tidak Tersedia
@@ -76,7 +79,7 @@
             <td>
                 <div class="car-title">{{ $mobil->nama_mobil ?? 'KENDARAAN' }}</div>
                 <div class="car-specs">
-                    {{ $mobil->tahun_mobil ?? '-' }} • {{ $informasi_umum->cc ?? '-' }} CC • {{ $informasi_umum->transmisi ?? '-' }} • {{ $informasi_umum->bahan_bakar ?? '-' }}
+                    {{ $mobil->tahun_mobil ?? '-' }} • {{ $informasi_umum->kapasitas_mesin ?? '-' }} CC • {{ $informasi_umum->transmisi ?? '-' }} • {{ $informasi_umum->bahan_bakar ?? '-' }}
                 </div>
                 
                 <div class="inspector-info">
@@ -91,7 +94,7 @@
     <table class="spec-table">
         <tr>
             <td>Nomor Polisi</td>
-            <td>{{ $mobil->nopol ?? '-' }}</td>
+            <td>{{ $informasi_umum->nomor_polisi ?? '-' }}</td>
             <td>PKB</td>
             <td>Rp. {{ number_format($stnk->pkb ?? 0, 0, ',', '.') }}</td>
         </tr>
@@ -102,19 +105,19 @@
         </tr>
         <tr>
             <td>Merek</td>
-            <td>{{ $mobil->merek ?? '-' }}</td>
+            <td>{{ $mobil->nama_mobil ?? '-' }}</td>
         </tr>
-        <tr>
+        <!-- <tr>
             <td>Model</td>
-            <td>{{ $mobil->model ?? '-' }}</td>
-        </tr>
+            <td>{{ $informasi_umum->model ?? '-' }}</td>
+        </tr> -->
         <tr>
             <td>Tipe</td>
-            <td>{{ $mobil->tipe ?? '-' }}</td>
+            <td>{{ $informasi_umum->tipe_mobil ?? '-' }}</td>
         </tr>
         <tr>
             <td>Warna</td>
-            <td>{{ $mobil->warna ?? '-' }}</td>
+            <td>{{ $informasi_umum->warna_mobil ?? '-' }}</td>
         </tr>
         <tr>
             <td>Nomor Rangka</td>
@@ -126,7 +129,7 @@
         </tr>
         <tr>
             <td>Jarak Tempuh</td>
-            <td>{{ $mobil->jarak_tempuh ?? '-' }}</td>
+            <td>{{ $informasi_umum->jarak_tempuh ?? '-' }}</td>
         </tr>
         <tr>
             <td>Pajak 1 Tahun</td>

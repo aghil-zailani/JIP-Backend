@@ -58,7 +58,7 @@ class UserController extends Controller
             'authorization' => [
                 'access_token' => $token,
                 'type' => 'bearer',
-                'expires_in' => auth()->guard('api')->factory()->getTTL() * 60 //GANTI INI JADI 24 JAM (60 GANTI JADI 1440)
+                'expires_in' => auth()->guard('api')->factory()->getTTL() * 1440 //GANTI INI JADI 24 JAM (60 GANTI JADI 1440)
             ]
         ]);
     }

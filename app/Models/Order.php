@@ -9,7 +9,7 @@ class Order extends Model
     protected $guarded = ['id'];
 
     protected $fillable = [
-        'mobil_id', 'user_id', 'nama_pelanggan', 'email_pelanggan', 
+        'mobil_id', 'user_id', 'nama_pelanggan', 'email_pelanggan','alamat_pelanggan', 
         'no_hp_pelanggan', 'status_inspeksi', 'lokasi_inspeksi', 
         'jadwal_inspeksi', 'biaya_inspeksi'
     ];

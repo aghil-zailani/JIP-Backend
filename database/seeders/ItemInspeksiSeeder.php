@@ -19,7 +19,7 @@ class ItemInspeksiSeeder extends Seeder
                 'Airbag', 'Sun Roof / Moon Roof'
             ],
             'Eksterior' => [
-                'Foto Depan Kendaraan','Kap Mesin', 'Bumper Depan', 'Lampu Depan', 'Fender Depan Kiri',
+                'Kap Mesin', 'Bumper Depan', 'Lampu Depan', 'Fender Depan Kiri',
                 'Fender Depan Kanan', 'Pintu Depan Kiri', 'Pilar A', 'Pilar B', 'Pilar C',
                 'Pintu Belakang Kiri', 'Quarter Kiri', 'Pintu Bagasi', 'End Panel', 'Stop Lamp',
                 'Quarter Kanan', 'Pintu Belakang Kanan', 'Fender Depan Kanan', 'Kaca Mobil / Seal',

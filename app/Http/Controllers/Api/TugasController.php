@@ -89,7 +89,7 @@ class TugasController extends Controller
                 'message' => 'Tugas ini sudah diselesaikan sebelumnya.'
             ], 400);
         }
-        
+
         $order->update([
             'status_inspeksi' => 'selesai'
         ]); 
@@ -286,11 +286,7 @@ class TugasController extends Controller
         $mobil = $order->mobil;        
         $hasil_inspeksi = [];
         $titik_normal = 0;
-        $titik_tidak_normal = 0;
-
-        $fotoDepan = $order->hasilInspeksiDetails->first(function ($item) {
-            return $item->itemInspeksi->nama_item == 'Foto Depan Kendaraan';
-        });
+        $titik_tidak_normal = 0;        
 
         foreach ($order->hasilInspeksiDetails as $detail) {
             $kategori = $detail->itemInspeksi->kategoriInspeksi->nama_kategori;
@@ -311,8 +307,7 @@ class TugasController extends Controller
             'mobil' => $mobil,
             'stnk' => $mobil->inspeksiStnk,
             'bpkb' => $mobil->inspeksiBpkb,
-            'informasi_umum' => $mobil->informasiUmum,
-            'foto_depan' => $fotoDepan ? $fotoDepan->foto_utama : null,
+            'informasi_umum' => $mobil->informasiUmum,            
             'hasil_inspeksi' => $hasil_inspeksi,
             'total_titik' => $titik_normal + $titik_tidak_normal,
             'titik_normal' => $titik_normal,

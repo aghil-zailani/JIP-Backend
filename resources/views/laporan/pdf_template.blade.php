@@ -51,9 +51,34 @@
         .item-title { font-size: 13px; font-weight: bold; color: #333; margin-bottom: 12px; display: block; }
         .item-status { font-size: 13px; font-weight: bold; text-align: right; }
         
-        /* FOTO DIPERBESAR MENJADI 140px */
-        .foto-grid { margin-top: 5px; }
-        .foto-grid img { width: 140px; height: 140px; object-fit: cover; margin-right: 10px; border-radius: 6px; border: 1px solid #ddd; }
+        /* FOTO UTAMA */
+        .foto-grid { margin-top: 10px; width: 100%; }
+        .foto-grid img { width: 140px; height: 140px; margin-bottom: 10px; object-fit: cover; margin-right: 10px; border-radius: 6px; border: 1px solid #ddd; }
+
+        /* FOTO KERUSAKAN */
+        .foto-kerusakan-wrapper {
+            margin-top: 12px;
+            padding: 10px 12px;
+            background-color: #fff5f5;
+            border: 2px solid #e74c3c;
+            border-radius: 6px;
+            page-break-inside: avoid;
+        }
+        .foto-kerusakan-label {
+            display: block;
+            font-size: 11px;
+            font-weight: bold;
+            color: #c0392b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+            padding: 3px 8px;
+            background-color: #e74c3c;
+            color: #ffffff;
+            border-radius: 4px;
+            width: fit-content;
+        }
+        .foto-kerusakan-wrapper img { width: 130px; height: 130px; object-fit: cover; margin-right: 8px; margin-bottom: 6px; border-radius: 5px; border: 2px solid #e74c3c; }
         
         .page-break { page-break-before: always; }
     </style>
@@ -153,7 +178,7 @@
                         <div style="font-weight:bold; font-size:16px; margin-top:8px; color:#444;">{{ $titik_normal }} titik</div>
                     </td>
                     <td>
-                        <div class="icon-alert">! Tidak Normal</div>
+                        <div class="icon-alert">Tidak Normal</div>
                         <div style="font-weight:bold; font-size:16px; margin-top:8px; color:#444;">{{ $titik_tidak_normal }} titik</div>
                     </td>
                 </tr>
@@ -179,8 +204,21 @@
                             @if($item->foto_utama)
                                 @php $clean_path_item = str_replace('/storage/', '', $item->foto_utama); @endphp
                                 <div class="foto-grid">
-                                    <img src="{{ storage_path('app/public/' . $clean_path_item) }}">
+                                    @if($item->foto_utama)
+                                        @php $clean_path_utama = str_replace('/storage/', '', $item->foto_utama); @endphp
+                                        <img src="{{ storage_path('app/public/' . $clean_path_utama) }}">
+                                    @endif
                                 </div>
+
+                                @if(isset($item->fotoKerusakans) && count($item->fotoKerusakans) > 0)
+                                    <div class="foto-kerusakan-wrapper">
+                                        <span class="foto-kerusakan-label">Foto Kerusakan - {{ $item->itemInspeksi->nama_item }}</span>
+                                        @foreach($item->fotoKerusakans as $foto)
+                                            @php $clean_path_tambahan = str_replace('/storage/', '', $foto->path_foto); @endphp
+                                            <img src="{{ storage_path('app/public/' . $clean_path_tambahan) }}">
+                                        @endforeach
+                                    </div>
+                                @endif
                             @endif
                             
                             @if($item->catatan)

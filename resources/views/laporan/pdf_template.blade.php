@@ -54,32 +54,45 @@
         /* FOTO UTAMA */
         .foto-grid { margin-top: 10px; width: 100%; }
         .foto-grid img { width: 140px; height: 140px; margin-bottom: 10px; object-fit: cover; margin-right: 10px; border-radius: 6px; border: 1px solid #ddd; }
-
-        /* FOTO KERUSAKAN */
+        
         .foto-kerusakan-wrapper {
-            margin-top: 12px;
-            padding: 10px 12px;
-            background-color: #fff5f5;
-            border: 2px solid #e74c3c;
+            border: 1px solid #e74c3c; 
+            background-color: #fdf2f2;         
+            overflow: hidden; 
+            padding: 12px;
             border-radius: 6px;
-            page-break-inside: avoid;
+            margin-top: 15px;
+            page-break-inside: avoid;            
+            display: block; 
         }
+
         .foto-kerusakan-label {
-            display: block;
-            font-size: 11px;
             font-weight: bold;
             color: #c0392b;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-            padding: 3px 8px;
-            background-color: #e74c3c;
-            color: #ffffff;
-            border-radius: 4px;
-            width: fit-content;
+            font-size: 13px;            
+            margin-bottom: 15px; 
+            border-bottom: 1px dashed #fadbd8;
+            padding-bottom: 8px;            
+            display: block; 
         }
-        .foto-kerusakan-wrapper img { width: 130px; height: 130px; object-fit: cover; margin-right: 8px; margin-bottom: 6px; border-radius: 5px; border: 2px solid #e74c3c; }
         
+        .foto-kerusakan-grid {
+            width: 100%;            
+            display: block;
+        }
+
+        .foto-kerusakan-grid img {
+            width: 125px; /* Sedikit dikecilkan agar lebih aman di dalam kotak */
+            height: 125px; 
+            object-fit: cover; 
+            margin-right: 10px;             
+            margin-bottom: 10px; 
+            border-radius: 4px; 
+            border: 1px solid #e74c3c;
+            display: inline-block;            
+            vertical-align: top; 
+        }
+
         .page-break { page-break-before: always; }
     </style>
 </head>
@@ -201,22 +214,28 @@
                     <tr>
                         <td style="width: 65%;">
                             <span class="item-title">{{ $item->itemInspeksi->nama_item }}</span>                            
-                            @if($item->foto_utama)
-                                @php $clean_path_item = str_replace('/storage/', '', $item->foto_utama); @endphp
+                            @if(!empty($item->foto_utama) && is_array($item->foto_utama))
                                 <div class="foto-grid">
-                                    @if($item->foto_utama)
-                                        @php $clean_path_utama = str_replace('/storage/', '', $item->foto_utama); @endphp
+                                    @foreach($item->foto_utama as $fotoPath)
+                                        @php $clean_path_utama = str_replace('/storage/', '', $fotoPath); @endphp
                                         <img src="{{ storage_path('app/public/' . $clean_path_utama) }}">
-                                    @endif
+                                    @endforeach
                                 </div>
 
                                 @if(isset($item->fotoKerusakans) && count($item->fotoKerusakans) > 0)
                                     <div class="foto-kerusakan-wrapper">
-                                        <span class="foto-kerusakan-label">Foto Kerusakan - {{ $item->itemInspeksi->nama_item }}</span>
-                                        @foreach($item->fotoKerusakans as $foto)
-                                            @php $clean_path_tambahan = str_replace('/storage/', '', $foto->path_foto); @endphp
-                                            <img src="{{ storage_path('app/public/' . $clean_path_tambahan) }}">
-                                        @endforeach
+                                        <div class="foto-kerusakan-label">
+                                            Detail Kerusakan - {{ $item->itemInspeksi->nama_item }}
+                                        </div>
+                                        
+                                        <div class="foto-kerusakan-grid">
+                                            @foreach($item->fotoKerusakans as $foto)
+                                                @php 
+                                                    $clean_path_tambahan = str_replace('/storage/', '', $foto->path_foto); 
+                                                @endphp
+                                                <img src="{{ storage_path('app/public/' . $clean_path_tambahan) }}">
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
                             @endif
@@ -230,6 +249,8 @@
                         <td style="width: 35%;" class="item-status">
                             @if($item->status_kondisi == 'normal')
                                 <span style="color:#2ecc71;">Normal</span>
+                            @elseif($item->status_kondisi == 'perlu_perbaikan')
+                                <span style="color:#F5D627;">Perlu Perbaikan</span>
                             @else
                                 <span style="color:#e74c3c;">{{ $item->status_kondisi }}</span>
                             @endif

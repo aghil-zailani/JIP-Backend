@@ -8,6 +8,10 @@ class HasilInspeksiDetail extends Model
 {
     protected $guarded = ['id'];
 
+    protected $casts = [
+        'foto_utama' => 'array',
+    ];
+
     public function order()
     {
         return $this->belongsTo(Order::class);

@@ -18,7 +18,7 @@ class TugasController extends Controller
     {
         $user = auth()->guard('api')->user();
 
-        $tugas = Order::with('mobil') 
+        $tugas = Order::with(['mobil', 'komisi']) 
             ->where('user_id', $user->id)
             // ->where('status_inspeksi', 'pending')
             ->orderBy('created_at', 'desc')
@@ -26,6 +26,7 @@ class TugasController extends Controller
 
         $formatTugas = $tugas->map(function ($order) {
             return [
+                'id'=> $order->komisi->id ?? null,
                 'order_id' => $order->id,                
                 'nama_pelanggan' => $order->nama_pelanggan, 
                 'no_hp' => $order->no_hp_pelanggan,
@@ -98,18 +99,18 @@ class TugasController extends Controller
         
         $user = auth()->guard('api')->user();
         Komisi::create([
-            'user_id' => $user->id,
-            'order_id' => $order->id,
-            'nomor_slip' => $slip,
+            'user_id'           => $user->id,
+            'order_id'          => $order->id,
+            'nomor_slip'        => $slip,
             'jumlah_pendapatan' => $order->biaya_inspeksi,
-            'metode_bayar' => '-',
-            'status' => 'pending',
+            'metode_bayar'      => '-',
+            'status'            => 'pending',
         ]);        
 
         return response()->json([
             'success' => true,
             'message' => 'Laporan Inspeksi berhasil dikirim dan tugas diselesaikan!',
-            'data' => $order
+            'data'    => $order
         ], 200);
     }
 
@@ -195,7 +196,7 @@ class TugasController extends Controller
     //     ], 200);
     // }
 
-    public function detailTugas($komisi_id)
+    public function detailTugas($order_id)
     {
         $user = auth()->guard('api')->user();
         
@@ -205,7 +206,7 @@ class TugasController extends Controller
             'order.mobil.inspeksiDokumenLain',
             'order.mobil.informasiUmum',
             'order.hasilInspeksiDetails.itemInspeksi.kategoriInspeksi'
-        ])->find($komisi_id);
+        ])->find($order_id);
 
         if (!$komisi) {
             return response()->json(['status' => 'error', 'message' => 'Data komisi tidak ditemukan'], 404);
@@ -230,10 +231,12 @@ class TugasController extends Controller
             }
 
             $hasil_inspeksi[$nama_kategori][] = [
-                'nama_item' => $detail->itemInspeksi->nama_item,
+                'nama_item'      => $detail->itemInspeksi->nama_item,
                 'status_kondisi' => $detail->status_kondisi,
-                'foto' => $detail->foto_utama ? url($detail->foto_utama) : null,
-                'catatan' => $detail->catatan
+                'foto'           => !empty($detail->foto_utama)
+                                        ? array_map(fn($path) => url($path), $detail->foto_utama)
+                                        : [],
+                'catatan'        => $detail->catatan
             ];
         }
     

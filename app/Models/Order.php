@@ -28,4 +28,9 @@ class Order extends Model
     {
         return $this->hasMany(HasilInspeksiDetail::class);
     }
+
+    public function komisi()
+    {
+        return $this->hasOne(Komisi::class);
+    }
 }

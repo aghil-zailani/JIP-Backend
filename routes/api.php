@@ -25,10 +25,8 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/tambah-inspeksi', [OrderController::class, 'tambahInspeksi']);
 
     Route::get('/tugas', [TugasController::class, 'index']);
-
-    Route::get('/tugas/{order_id}/dokumen', [DokumenController::class, 'getDokumen']);
-
     Route::get('/tugas/detail/{order_id}', [TugasController::class, 'detailTugas']);
+    Route::get('/tugas/{order_id}/dokumen', [DokumenController::class, 'getDokumen']);    
     Route::post('/tugas/{order_id}/informasi', [TugasController::class, 'simpanInformasi']);
     Route::post('/tugas/{order_id}/dokumen', [DokumenController::class, 'simpanDokumen']);
     Route::post('/tugas/{order_id}/interior/{item_id}', [InteriorController::class, 'simpanHasilItem']);

@@ -83,11 +83,21 @@ class DokumenController extends Controller
 
     public function getDokumen($order_id)
     {
-        $order = Order::with('dokumen')->findOrFail($order_id);
+        $order = Order::with([
+            'mobil.inspeksiStnk',
+            'mobil.inspeksiBpkb',
+            'mobil.inspeksiDokumenLain',
+        ])->findOrFail($order_id);
+
+        $mobil = $order->mobil;
 
         return response()->json([
             'success' => true,
-            'data' => $order->dokumen
+            'data'    => [
+                'stnk'         => $mobil->inspeksiStnk,
+                'bpkb'         => $mobil->inspeksiBpkb,
+                'dokumen_lain' => $mobil->inspeksiDokumenLain,
+            ]
         ]);
     }
 }

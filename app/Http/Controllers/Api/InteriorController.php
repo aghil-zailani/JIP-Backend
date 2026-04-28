@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Drivers\Gd\Driver;
-use Intervention\Image\Laravel\Facades\Image;
+use Intervention\Image\Encoders\JpegEncoder;
 use App\Models\HasilInspeksiDetail;
 use App\Models\Order;
 use App\Models\ItemInspeksi;
@@ -17,6 +17,16 @@ class InteriorController extends Controller
 {
     public function simpanHasilItem(Request $request, $order_id, $item_id)
     {
+        $request->validate([
+            'status_kondisi'   => 'required|string',
+            'catatan'          => 'nullable|string',
+            'is_draft'         => 'nullable|in:0,1',
+            'foto_utama'       => 'nullable|array',
+            'foto_utama.*'     => 'nullable|image|max:5120',
+            'foto_tambahan'    => 'nullable|array',
+            'foto_tambahan.*'  => 'nullable|image|max:5120',
+        ]);
+
         $order = Order::findOrFail($order_id);
         
         $hasilLama = HasilInspeksiDetail::where('order_id', $order_id)
@@ -24,9 +34,9 @@ class InteriorController extends Controller
                         ->first();
 
         $dataUpdate = [
-            'status_kondisi' => strtolower($request->kondisi ?? 'normal'),
-            'catatan' => $request->catatan,
-            'is_draft' => $request->input('is_draft', true) 
+            'status_kondisi' => str_replace(' ', '_', strtolower(trim($request->status_kondisi ?? 'normal'))),
+            'catatan'        => $request->catatan,
+            'is_draft'       => $request->input('is_draft', true),
         ];
                 
         $imageManager = new ImageManager(new Driver());
@@ -34,21 +44,34 @@ class InteriorController extends Controller
         if ($request->hasFile('foto_utama')) {
 
             $arrayFoto = $request->file('foto_utama');
-
-            if ($hasilLama && $hasilLama->foto_utama) {
-                $oldPath = str_replace('/storage/', '', $hasilLama->foto_utama);
-                Storage::disk('public')->delete($oldPath);
+            // Pastikan selalu array
+            if (!is_array($arrayFoto)) {
+                $arrayFoto = [$arrayFoto];
             }
 
-            $file = $arrayFoto[0];            
-            $filename = time() . '_utama_order' . $order_id . '_item' . $item_id . '.jpg';
-            $path = 'inspeksi/item/' . $filename; 
-            
-            $image = $imageManager->read($file->getRealPath());
-            $image->scaleDown(width: 800);
-            Storage::disk('public')->put($path, $image->toJpeg(75));
+            // Hapus semua foto utama lama
+            if ($hasilLama && !empty($hasilLama->foto_utama)) {
+                foreach ($hasilLama->foto_utama as $oldFoto) {
+                    $oldPath = str_replace('/storage/', '', $oldFoto);
+                    Storage::disk('public')->delete($oldPath);
+                }
+            }
 
-            $dataUpdate['foto_utama'] = '/storage/' . $path;
+            $savedPaths = [];
+            foreach ($arrayFoto as $index => $file) {
+                if (!$file || !$file->isValid()) continue;
+
+                $filename = time() . '_utama_' . $index . '_order' . $order_id . '_item' . $item_id . '.jpg';
+                $path = 'inspeksi/item/' . $filename;
+
+                $image = $imageManager->decodePath($file->getRealPath());
+                $image->scaleDown(width: 800);
+                Storage::disk('public')->put($path, $image->encode(new JpegEncoder(quality: 75)));
+
+                $savedPaths[] = '/storage/' . $path;
+            }
+
+            $dataUpdate['foto_utama'] = $savedPaths;
         }
                 
         $hasil = HasilInspeksiDetail::updateOrCreate(
@@ -56,9 +79,14 @@ class InteriorController extends Controller
             $dataUpdate
         );
                 
-        if ($request->hasFile('foto') && count($request->file('foto')) > 1) {
-            $arrayFoto = $request->file('foto');
-                    
+        if ($request->hasFile('foto_tambahan')) {
+            $arrayFotoTambahan = $request->file('foto_tambahan');
+            // Pastikan selalu array
+            if (!is_array($arrayFotoTambahan)) {
+                $arrayFotoTambahan = [$arrayFotoTambahan];
+            }
+
+            // Hapus foto kerusakan lama
             if ($hasilLama) {
                 $fotoLamaList = FotoKerusakan::where('hasil_inspeksi_detail_id', $hasilLama->id)->get();
                 foreach ($fotoLamaList as $fotoLama) {
@@ -66,18 +94,19 @@ class InteriorController extends Controller
                     $fotoLama->delete();
                 }
             }
-        
-            for ($i = 1; $i < count($arrayFoto); $i++) {
-                $fileTambahan = $arrayFoto[$i];
-                $filenameTambahan = time() . '_tambahan_' . $i . '_order' . $order_id . '_item' . $item_id . '.jpg';
-                $pathTambahan = 'inspeksi/kerusakan/' . $filenameTambahan;            
-                $imgTambahan = $imageManager->read($fileTambahan->getRealPath());
+
+            foreach ($arrayFotoTambahan as $index => $fileTambahan) {
+                if (!$fileTambahan || !$fileTambahan->isValid()) continue;
+
+                $filenameTambahan = time() . '_tambahan_' . $index . '_order' . $order_id . '_item' . $item_id . '.jpg';
+                $pathTambahan = 'inspeksi/kerusakan/' . $filenameTambahan;
+                $imgTambahan = $imageManager->decodePath($fileTambahan->getRealPath());
                 $imgTambahan->scaleDown(width: 800);
-                Storage::disk('public')->put($pathTambahan, $imgTambahan->toJpeg(75));
-                                
+                Storage::disk('public')->put($pathTambahan, $imgTambahan->encode(new JpegEncoder(quality: 75)));
+
                 FotoKerusakan::create([
                     'hasil_inspeksi_detail_id' => $hasil->id,
-                    'path_foto' => '/storage/' . $pathTambahan,
+                    'path_foto'                => '/storage/' . $pathTambahan,
                 ]);
             }
         }

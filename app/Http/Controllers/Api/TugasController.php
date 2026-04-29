@@ -243,7 +243,7 @@ class TugasController extends Controller
         $dataLaporan = [
             'header' => [
                 'nama_kendaraan' => $mobil->nama_mobil ?? '-',
-                'spesifikasi' => ($mobil->tahun_mobil ?? '-') . ' • ' . ($mobil->informasiUmum->cc ?? '-') . ' CC',
+                'spesifikasi' => ($mobil->tahun_mobil ?? '-') . ' • ' . ($mobil->informasiUmum->kapasitas_mesin ?? '-') . ' CC',
                 'inspektor' => $user->name,
                 'tanggal_inspeksi' => $order->updated_at->translatedFormat('d M Y'),
             ],

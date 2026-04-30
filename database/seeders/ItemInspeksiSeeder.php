@@ -22,7 +22,7 @@ class ItemInspeksiSeeder extends Seeder
                 'Kap Mesin', 'Bumper Depan', 'Lampu Depan', 'Fender Depan Kiri',
                 'Fender Depan Kanan', 'Pintu Depan Kiri', 'Pilar A', 'Pilar B', 'Pilar C',
                 'Pintu Belakang Kiri', 'Quarter Kiri', 'Pintu Bagasi', 'End Panel', 'Stop Lamp',
-                'Quarter Kanan', 'Pintu Belakang Kanan', 'Fender Depan Kanan', 'Kaca Mobil / Seal',
+                'Quarter Kanan', 'Pintu Belakang Kanan', 'Pintu Depan Kanan', 'Fender Depan Kanan', 'Kaca Mobil / Seal',
                 'List Plang Bawah', 'Spion'
             ],
             'Mesin' => [

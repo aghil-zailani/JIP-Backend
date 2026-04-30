@@ -282,39 +282,63 @@ class TugasController extends Controller
             'order.mobil.inspeksiStnk', 
             'order.mobil.inspeksiBpkb',
             'order.mobil.informasiUmum', 
-            'order.hasilInspeksiDetails.itemInspeksi.kategoriInspeksi'
+            'order.hasilInspeksiDetails.itemInspeksi.kategoriInspeksi',
+            'order.hasilInspeksiDetails.fotoKerusakans',
         ])->findOrFail($komisi_id);
         
         $order = $komisi->order;
         $mobil = $order->mobil;        
-        $hasil_inspeksi = [];
-        $titik_normal = 0;
-        $titik_tidak_normal = 0;        
+        $hasil_inspeksi    = [];
+        $titik_normal      = 0;
+        $titik_tidak_normal = 0;
+        // Statistik per kategori: ['NamaKategori' => ['normal' => N, 'tidak_normal' => N]]
+        $statistik_per_kategori = [];
+        // Daftar item rusak untuk ringkasan: [['kategori' => '...', 'nama_item' => '...', 'status' => '...']]
+        $item_rusak = [];
 
         foreach ($order->hasilInspeksiDetails as $detail) {
             $kategori = $detail->itemInspeksi->kategoriInspeksi->nama_kategori;
-            
+
+            if (!isset($statistik_per_kategori[$kategori])) {
+                $statistik_per_kategori[$kategori] = ['normal' => 0, 'tidak_normal' => 0];
+            }
+
             if ($detail->status_kondisi === 'normal') {
                 $titik_normal++;
+                $statistik_per_kategori[$kategori]['normal']++;
             } else {
                 $titik_tidak_normal++;
+                $statistik_per_kategori[$kategori]['tidak_normal']++;
+                $item_rusak[] = [
+                    'kategori'   => $kategori,
+                    'nama_item'  => $detail->itemInspeksi->nama_item,
+                    'status'     => $detail->status_kondisi,
+                ];
             }
 
             $hasil_inspeksi[$kategori][] = $detail;
         }
 
         $dataLaporan = [
-            'instansi' => $user->instansi,
-            'inspektor' => $user->name,
-            'tanggal' => $order->updated_at->translatedFormat('d M Y'),
-            'mobil' => $mobil,
-            'stnk' => $mobil->inspeksiStnk,
-            'bpkb' => $mobil->inspeksiBpkb,
-            'informasi_umum' => $mobil->informasiUmum,            
-            'hasil_inspeksi' => $hasil_inspeksi,
-            'total_titik' => $titik_normal + $titik_tidak_normal,
-            'titik_normal' => $titik_normal,
-            'titik_tidak_normal' => $titik_tidak_normal,
+            'instansi'               => $user->instansi,
+            'inspektor'              => $user->name,
+            'tanggal'                => $order->updated_at->translatedFormat('d F Y'),
+            'mobil'                  => $mobil,
+            'stnk'                   => $mobil->inspeksiStnk,
+            'bpkb'                   => $mobil->inspeksiBpkb,
+            'informasi_umum'         => $mobil->informasiUmum,
+            'dokumen_lain'           => $mobil->inspeksiDokumenLain,
+            'hasil_inspeksi'         => $hasil_inspeksi,
+            'statistik_per_kategori' => $statistik_per_kategori,
+            'total_titik'            => $titik_normal + $titik_tidak_normal,
+            'titik_normal'           => $titik_normal,
+            'titik_tidak_normal'     => $titik_tidak_normal,
+            'item_rusak'             => $item_rusak,
+            'catatan_tambahan'       => $mobil->informasiUmum->catatan_tambahan ?? null,
+            'kondisi_banjir'         => $mobil->informasiUmum->kondisi_banjir ?? null,
+            'kondisi_tabrak'         => $mobil->informasiUmum->kondisi_tabrak ?? null,
+            'titik_banjir'           => $mobil->informasiUmum->titik_banjir ?? null,
+            'titik_tabrak'           => $mobil->informasiUmum->titik_tabrak ?? null,
         ];
 
         $pdf = Pdf::loadView('laporan.pdf_template', $dataLaporan);

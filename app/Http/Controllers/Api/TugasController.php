@@ -57,7 +57,29 @@ class TugasController extends Controller
             'kapasitas_mesin' => 'required|numeric',
             'bahan_bakar' => 'required|string',
             'warna_mobil' => 'required|string',
-            'jarak_tempuh' => 'required|numeric',
+            'jarak_tempuh' => 'required|numeric',            
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+        
+        $order = Order::findOrFail($order_id);
+        $mobil = InformasiUmum::updateOrCreate(
+            ['mobil_id' => $order->mobil_id], 
+            $request->all() 
+        );        
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Draft Informasi Kendaraan berhasil diperbarui',
+            'data' => $mobil
+        ]);
+    }
+
+    public function simpanInformasiKesimpulan(Request $request, $order_id)
+    {        
+        $validator = Validator::make($request->all(), [            
             'kondisi_tabrak' => 'required|string',
             'kondisi_banjir' => 'required|string',
             'catatan_tambahan' => 'nullable|string',

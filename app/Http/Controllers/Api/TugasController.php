@@ -65,14 +65,23 @@ class TugasController extends Controller
         }
         
         $order = Order::findOrFail($order_id);
-        $mobil = InformasiUmum::updateOrCreate(
-            ['mobil_id' => $order->mobil_id], 
-            $request->all() 
-        );        
+        
+        $mobil = InformasiUmum::where('mobil_id', $order->mobil_id)->first();
+        
+        if (!$mobil) {
+            $mobil = new InformasiUmum();
+            $mobil->mobil_id = $order->mobil_id;
+            $mobil->kondisi_tabrak = '-';
+            $mobil->kondisi_banjir = '-';
+            $mobil->catatan_tambahan = '-';
+        }
+        
+        $mobil->fill($validator->validated());
+        $mobil->save();
 
         return response()->json([
             'success' => true,
-            'message' => 'Draft Informasi Kendaraan berhasil diperbarui',
+            'message' => 'Draft Informasi Kendaraan berhasil disimpan',
             'data' => $mobil
         ]);
     }
@@ -90,14 +99,21 @@ class TugasController extends Controller
         }
         
         $order = Order::findOrFail($order_id);
-        $mobil = InformasiUmum::updateOrCreate(
-            ['mobil_id' => $order->mobil_id], 
-            $request->all() 
-        );        
+        
+        $mobil = InformasiUmum::where('mobil_id', $order->mobil_id)->first();
+        
+        if (!$mobil) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Data Informasi Umum Kendaraan belum diisi!'
+            ], 404);
+        }
+
+        $mobil->update($validator->validated());        
 
         return response()->json([
             'success' => true,
-            'message' => 'Draft Informasi Kendaraan berhasil diperbarui',
+            'message' => 'Kesimpulan Inspeksi berhasil diperbarui',
             'data' => $mobil
         ]);
     }

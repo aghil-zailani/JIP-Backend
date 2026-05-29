@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\Komisi;
 use Illuminate\Support\Facades\DB;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Traits\ConvertFileBase64;
 
 class TugasController extends Controller
 {
+    use ConvertFileBase64;
     public function index()
     {
         $user = auth()->guard('api')->user();
@@ -272,7 +274,7 @@ class TugasController extends Controller
                 'nama_item'      => $detail->itemInspeksi->nama_item,
                 'status_kondisi' => $detail->status_kondisi,
                 'foto'           => !empty($detail->foto_utama)
-                                        ? array_map(fn($path) => url($path), $detail->foto_utama)
+                                        ? $this->filesToBase64($detail->foto_utama)
                                         : [],
                 'catatan'        => $detail->catatan
             ];

@@ -10,9 +10,11 @@ use Illuminate\Support\Facades\Validator;
 use App\Models\InformasiInstansi;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\ConvertFileBase64;
 
 class UserController extends Controller
 {
+    use ConvertFileBase64;
 
     public function login(Request $request)
     {
@@ -241,6 +243,12 @@ class UserController extends Controller
     public function profile(){
         $user = auth()->guard('api')->user();
         $instansi = InformasiInstansi::where('user_id', $user->id)->first();
+        
+        // Konversi logo instansi ke base64
+        if ($instansi && $instansi->logo_instansi) {
+            $instansi->logo_instansi = $this->fileToBase64($instansi->logo_instansi);
+        }
+        
         $user->instansi = $instansi;
         
         return response()->json([

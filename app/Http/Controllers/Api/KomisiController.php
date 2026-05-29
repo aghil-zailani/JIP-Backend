@@ -9,9 +9,11 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Order;
 use App\Models\User;
 use App\Models\Mobil;
+use App\Traits\ConvertFileBase64;
 
 class KomisiController extends Controller
 {
+    use ConvertFileBase64;
     public function index()
     {
         $user = auth()->guard('api')->user()->load('instansi');        
@@ -83,6 +85,9 @@ class KomisiController extends Controller
             'email_pelanggan' => $komisi->order ? $komisi->order->email_pelanggan : '-',
             'no_hp_pelanggan' => $komisi->order ? $komisi->order->no_hp_pelanggan : '-',
             'biaya_inspeksi' => $komisi->order ? 'Rp ' . number_format($komisi->order->biaya_inspeksi, 0, ',', '.') : '-',
+            'bukti_pembayaran' => $komisi->bukti_pembayaran 
+                ? $this->fileToBase64($komisi->bukti_pembayaran) 
+                : null,
             'mobil_info' => $mobilInfo
         ];
         

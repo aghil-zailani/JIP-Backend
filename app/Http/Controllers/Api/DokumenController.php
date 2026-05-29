@@ -9,9 +9,11 @@ use App\Models\InspeksiStnk;
 use App\Models\InspeksiBpkb;
 use App\Models\InspeksiDokumenLain;
 use App\Models\Order;
+use App\Traits\ConvertFileBase64;
 
 class DokumenController extends Controller
 {
+    use ConvertFileBase64;
     public function simpanDokumen(Request $request, $order_id)
     {
         $order = Order::findOrFail($order_id);
@@ -91,11 +93,28 @@ class DokumenController extends Controller
 
         $mobil = $order->mobil;
 
+        // Konversi foto STNK ke base64
+        $stnk = $mobil->inspeksiStnk;
+        if ($stnk && $stnk->foto_stnk) {
+            $stnk->foto_stnk = $this->fileToBase64($stnk->foto_stnk);
+        }
+
+        // Konversi foto BPKB ke base64
+        $bpkb = $mobil->inspeksiBpkb;
+        if ($bpkb) {
+            for ($i = 1; $i <= 4; $i++) {
+                $fotoKey = 'foto_bpkb_' . $i;
+                if (!empty($bpkb->$fotoKey)) {
+                    $bpkb->$fotoKey = $this->fileToBase64($bpkb->$fotoKey);
+                }
+            }
+        }
+
         return response()->json([
             'success' => true,
             'data'    => [
-                'stnk'         => $mobil->inspeksiStnk,
-                'bpkb'         => $mobil->inspeksiBpkb,
+                'stnk'         => $stnk,
+                'bpkb'         => $bpkb,
                 'dokumen_lain' => $mobil->inspeksiDokumenLain,
             ]
         ]);

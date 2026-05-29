@@ -10,12 +10,16 @@ use App\Http\Controllers\Api\InteriorController;
 use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\KomisiController;
+use App\Http\Controllers\Api\FileController;
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/lupa-password', [UserController::class, 'lupaPassword']);
 
 Route::middleware('auth:api')->group(function () {
+    // File serving (pengganti storage:link untuk shared hosting)
+    Route::get('/file', [FileController::class, 'serveBase64']);
+    Route::get('/file/serve', [FileController::class, 'serveDirect']);
     Route::get('/users', [UserController::class, 'index']); 
     Route::get('/dashboard', [DashboardController::class, 'index']);    
 

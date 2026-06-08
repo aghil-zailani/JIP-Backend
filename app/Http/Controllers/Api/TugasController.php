@@ -245,7 +245,8 @@ class TugasController extends Controller
             'order.mobil.inspeksiBpkb', 
             'order.mobil.inspeksiDokumenLain',
             'order.mobil.informasiUmum',
-            'order.hasilInspeksiDetails.itemInspeksi.kategoriInspeksi'
+            'order.hasilInspeksiDetails.itemInspeksi.kategoriInspeksi',
+            'order.hasilInspeksiDetails.fotoKerusakans'
         ])->find($order_id);
 
         if (!$komisi) {
@@ -276,6 +277,9 @@ class TugasController extends Controller
                 'foto'           => !empty($detail->foto_utama)
                                         ? $this->filesToBase64($detail->foto_utama)
                                         : [],
+                'foto_tambahan'  => $detail->fotoKerusakans->map(function ($foto) {
+                                        return $this->fileToBase64($foto->path_foto);
+                                    })->filter()->values()->toArray(),
                 'catatan'        => $detail->catatan
             ];
         }

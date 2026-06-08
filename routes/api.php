@@ -11,10 +11,15 @@ use App\Http\Controllers\Api\MasterDataController;
 use App\Http\Controllers\Api\OrderController;
 use App\Http\Controllers\Api\KomisiController;
 use App\Http\Controllers\Api\FileController;
+use App\Http\Controllers\Api\TestPhotoController;
 
 Route::post('/register', [UserController::class, 'register']);
 Route::post('/login', [UserController::class, 'login']);
 Route::post('/lupa-password', [UserController::class, 'lupaPassword']);
+
+Route::post('/test-photo/upload', [TestPhotoController::class, 'upload']);
+Route::post('/test-photo/base64', [TestPhotoController::class, 'uploadBase64']);
+Route::get('/test-photo/list', [TestPhotoController::class, 'list']);
 
 Route::middleware('auth:api')->group(function () {
     // File serving (pengganti storage:link untuk shared hosting)
@@ -39,6 +44,14 @@ Route::middleware('auth:api')->group(function () {
     Route::post('/tugas/{order_id}/mesin/{item_id}', [InteriorController::class, 'simpanHasilItem']);
     Route::post('/tugas/{order_id}/eksterior/{item_id}', [InteriorController::class, 'simpanHasilItem']);
     Route::post('/tugas/{order_id}/selesai', [TugasController::class, 'selesaikanTugas']);
+
+    // ─── Endpoint Photo (simpan langsung ke public/Photo, tanpa storage:link) ───
+    Route::post('/tugas/{order_id}/dokumen-photo', [DokumenController::class, 'simpanDokumenPhoto']);
+    Route::get('/tugas/{order_id}/dokumen-photo', [DokumenController::class, 'getDokumenPhoto']);
+    Route::post('/tugas/{order_id}/interior-photo/{item_id}', [InteriorController::class, 'simpanHasilItemPhoto']);
+    Route::post('/tugas/{order_id}/kaki-kaki-photo/{item_id}', [InteriorController::class, 'simpanHasilItemPhoto']);
+    Route::post('/tugas/{order_id}/mesin-photo/{item_id}', [InteriorController::class, 'simpanHasilItemPhoto']);
+    Route::post('/tugas/{order_id}/eksterior-photo/{item_id}', [InteriorController::class, 'simpanHasilItemPhoto']);
 
     Route::get('/laporan/{komisi_id}/pdf', [TugasController::class, 'exportPdf']);
 

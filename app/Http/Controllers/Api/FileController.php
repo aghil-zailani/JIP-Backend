@@ -8,20 +8,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
 /**
- * FileController
- * 
  * Endpoint khusus untuk serve file dari storage tanpa symlink.
- * Bisa digunakan sebagai fallback jika frontend butuh load file satu-satu.
  */
 class FileController extends Controller
 {
     use ConvertFileBase64;
-
-    /**
-     * Serve file sebagai base64 data URI.
-     * 
-     * Usage: GET /api/file?path=/storage/inspeksi/item/xxx.jpg
-     */
     public function serveBase64(Request $request)
     {
         $request->validate([
@@ -43,11 +34,6 @@ class FileController extends Controller
         ]);
     }
 
-    /**
-     * Serve file langsung sebagai binary response (untuk download/preview).
-     * 
-     * Usage: GET /api/file/serve?path=/storage/inspeksi/item/xxx.jpg
-     */
     public function serveDirect(Request $request)
     {
         $request->validate([

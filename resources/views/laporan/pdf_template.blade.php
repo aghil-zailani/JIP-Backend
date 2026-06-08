@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
     <title>Laporan Inspeksi Kendaraan</title>
@@ -212,12 +212,36 @@
     </style>
 </head>
 <body>    
+    @php
+        /**
+         * Helper: resolve path foto dari database ke absolute path filesystem.
+         * Support 2 format:
+         *   /storage/inspeksi/item/xxx.jpg  → storage_path('app/public/inspeksi/item/xxx.jpg')
+         *   /Photo/dokumen/5/stnk/xxx.jpg   → public_path('Photo/dokumen/5/stnk/xxx.jpg')
+         */
+        function resolvePhotoPath($path) {
+            if (empty($path)) return '';
+
+            // Path dari folder public/Photo
+            if (str_starts_with($path, '/Photo/') || str_starts_with($path, 'Photo/')) {
+                return public_path(ltrim($path, '/'));
+            }
+
+            // Path dari storage (lama)
+            $clean = $path;
+            if (str_starts_with($clean, '/storage/')) {
+                $clean = substr($clean, 9);
+            } elseif (str_starts_with($clean, 'storage/')) {
+                $clean = substr($clean, 8);
+            }
+            return storage_path('app/public/' . $clean);
+        }
+    @endphp
     <table class="header-instansi">
         <tr>
             <td>
                 @if($instansi && $instansi->logo_instansi)
-                    @php $clean_logo = str_replace('/storage/', '', $instansi->logo_instansi); @endphp
-                    <img src="{{ storage_path('app/public/' . $clean_logo) }}" class="instansi-logo" alt="Logo">
+                    <img src="{{ resolvePhotoPath($instansi->logo_instansi) }}" class="instansi-logo" alt="Logo">
                 @else
                     <h2 style="margin:0; color:#0d1b54;">{{ $instansi->nama_instansi ?? 'Sistem Inspeksi' }}</h2>
                 @endif
@@ -393,8 +417,7 @@
         <div class="foto-dokumen-wrapper">
             <span class="foto-dokumen-label">Foto STNK</span>
             <div class="foto-dokumen-grid">
-                @php $clean_stnk = str_replace('/storage/', '', $stnk->foto_stnk); @endphp
-                <img src="{{ storage_path('app/public/' . $clean_stnk) }}" alt="Foto STNK">
+                <img src="{{ resolvePhotoPath($stnk->foto_stnk) }}" alt="Foto STNK">
             </div>
         </div>
     @else
@@ -415,8 +438,7 @@
             <span class="foto-dokumen-label">Foto BPKB</span>
             <div class="foto-dokumen-grid">
                 @foreach($fotoBpkbList as $fotoBpkb)
-                    @php $clean_bpkb = str_replace('/storage/', '', $fotoBpkb); @endphp
-                    <img src="{{ storage_path('app/public/' . $clean_bpkb) }}" alt="Foto BPKB">
+                    <img src="{{ resolvePhotoPath($fotoBpkb) }}" alt="Foto BPKB">
                 @endforeach
             </div>
         </div>
@@ -562,9 +584,8 @@
                                     <table class="foto-table">
                                         <tr>
                                             @foreach($chunk as $fotoPath)
-                                                @php $clean_path_utama = str_replace('/storage/', '', $fotoPath); @endphp
                                                 <td style="width:33.33%;">
-                                                    <img src="{{ storage_path('app/public/' . $clean_path_utama) }}" alt="Foto Utama">
+                                                    <img src="{{ resolvePhotoPath($fotoPath) }}" alt="Foto Utama">
                                                 </td>
                                             @endforeach
                                             {{-- Isi sisa kolom kosong agar rata --}}
@@ -586,9 +607,8 @@
                                         <table class="kerusakan-table">
                                             <tr>
                                                 @foreach($chunk as $foto)
-                                                    @php $clean_path_tambahan = str_replace('/storage/', '', $foto->path_foto); @endphp
                                                     <td style="width:33.33%;">
-                                                        <img src="{{ storage_path('app/public/' . $clean_path_tambahan) }}" alt="Foto Kerusakan">
+                                                        <img src="{{ resolvePhotoPath($foto->path_foto) }}" alt="Foto Kerusakan">
                                                     </td>
                                                 @endforeach
                                                 @for($q = count($chunk); $q < 3; $q++)
